@@ -1,0 +1,34 @@
+{
+  "name": "slingshot",
+  "version": "1.0.0",
+  "description": "RockPaperScissors test project for Slingshot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KlaatuCarpenter/RockPaperScissors-test-project.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KlaatuCarpenter/RockPaperScissors-test-project/issues"
+  },
+  "homepage": "https://github.com/KlaatuCarpenter/RockPaperScissors-test-project#readme",
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.3",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "chai": "*",
+    "chai-bn": "^0.3.0",
+    "ethereum-waffle": "^3.0.0",
+    "ethers": "^5.0.0",
+    "hardhat": "^2.7.0",
+    "mocha": "*",
+    "solidity-coverage": "^0.7.17"
+  },
+  "dependencies": {
+    "@remix-project/remixd": "^0.5.5",
+    "dotenv": "^10.0.0"
+  }
+}
