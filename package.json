@@ -21,6 +21,7 @@
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "chai": "*",
     "chai-bn": "^0.3.0",
+    "crypto-js": "^4.1.1",
     "ethereum-waffle": "^3.0.0",
     "ethers": "^5.0.0",
     "hardhat": "^2.7.0",

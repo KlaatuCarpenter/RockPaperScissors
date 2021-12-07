@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "hardhat/console.sol";
-
 /// @title Rock Paper Scissors Game
 /// @author Damian Piorun aka KlaatuCarpenter
 contract Game {
@@ -15,43 +13,105 @@ contract Game {
     }
     struct Move {
         bytes32 blindedMove;
-        uint256 deposit;
+        uint256 wager;
+        uint256 timeStamp;
         address counterPlayer;
         bool notRevealed;
         Choice choice;
     }
     mapping(address => Move) public moves;
+    mapping(address => uint256) public balance;
 
     /// Events
-    event MoveMade(address moveMaker);
     event GameEnded(address winner);
 
     /// Errors
-    /// Game is already ended
-    error GameAlreadyEnded();
+    error TooEarly(uint256 time);
+    error CannotWithdrawDuringGame();
+    error RevealMoveFirst(address player);
+    error InsufficientDeposit(uint256 deposit, uint256 minDeposit);
+    error ChallengeNotTaken();
+    error ResultFunctionShouldBeCalled();
+    error NothingToReveal();
 
-    /// Place a blinded move with `blindedMove` = 
-    /// keccak256(abi.encodePacked(address, move, salt)).
+    modifier onlyAfter5Minutes(uint256 time) {
+        if (block.timestamp <= time) revert TooEarly(time);
+        _;
+    }
+
+    function deposit() external payable {
+        balance[msg.sender] += msg.value;
+    }
+
+    /// Withdraw funds
+    function withdraw() external returns (bool) {
+        if (moves[msg.sender].counterPlayer != address(0)) revert CannotWithdrawDuringGame();
+        uint256 amount = balance[msg.sender];
+        if (amount > 0) {
+            balance[msg.sender] = 0;
+            if (!payable(msg.sender).send(amount)) {
+                // No need to call throw here, just reset the amount owing
+                balance[msg.sender] = amount;
+                return false;
+            }
+        }
+        return true;
+    }
+
     /// The game can only be won, when the move is correctly
-    /// reveled in the revealing phase.
-    function move(bytes32 _blindedMove, address _counterPlayer) external payable { 
+    /// revealed in the revealing phase.
+    /// @param _blindedMove == keccak256(abi.encodePacked(move, salt))
+    function move(bytes32 _blindedMove, uint256 _wager , address _counterPlayer) external { 
         /// Prevent user to move several times, without revealing.
-        require(!moves[msg.sender].notRevealed, "Your last move is not revealed. Reveal it first.");      
+        if (moves[msg.sender].notRevealed) revert RevealMoveFirst(msg.sender);      
+        if (balance[msg.sender] < (2 *_wager)) revert InsufficientDeposit(balance[msg.sender], (2 * _wager));
         Move storage m = moves[msg.sender];       
         m.blindedMove = _blindedMove;
-        m.deposit = msg.value;
+        m.wager = _wager;
+        m.timeStamp = block.timestamp;
         m.counterPlayer = _counterPlayer;
         m.notRevealed = true;
         m.choice = Choice.None;
     }
 
     /// Reveal users blinded move
-    function reveal(Choice _choice, bytes32 _salt) external {
+    /// @param _choice - should be the same as the one given to _blindedMove in move function
+    /// @param _salt - should be the same as the one given to _blindedMove in move function
+    function reveal(Choice _choice, bytes32 _salt) external returns(bool) {
+        if (!moves[msg.sender].notRevealed) revert NothingToReveal();
+        address counterPlayer = moves[msg.sender].counterPlayer;
+        if (moves[counterPlayer].counterPlayer != msg.sender) revert ChallengeNotTaken();
         moves[msg.sender].notRevealed = false; 
         if (moves[msg.sender].blindedMove == keccak256(abi.encodePacked(_choice, _salt))) {
-            Move storage m = moves[msg.sender];
-            m.choice = _choice;
+            moves[msg.sender].choice = _choice;
+            return true;
         }
+        return false;
+    }
+
+    /// If the other player is not cooperative, it is possible to finish the game after 5 minutes
+    /// regardless of what the other player did
+    function terminateGame() external onlyAfter5Minutes(moves[msg.sender].timeStamp + 5 minutes) {
+        address counterPlayer = moves[msg.sender].counterPlayer;
+        if (moves[counterPlayer].counterPlayer == msg.sender) {
+            if (moves[msg.sender].notRevealed) revert RevealMoveFirst(msg.sender);
+            if (!moves[counterPlayer].notRevealed) {
+                revert ResultFunctionShouldBeCalled();
+            } else {
+                /// If counter player made a move, but he does not want to reveal, this scenario occurs:
+                /// The counter player's choice is None.
+                /// The wager is doubled, so the player, who does not reveals on his own, lose two times more.
+                moves[counterPlayer].notRevealed = false;
+                moves[counterPlayer].choice = Choice.None;
+                moves[counterPlayer].wager *= 2;
+                moves[msg.sender].wager *= 2;
+                return;
+            }
+        } 
+        /// Otherwise if counter player did not play this game, just reset player's move
+        moves[msg.sender].wager = 0;
+        moves[msg.sender].counterPlayer = address(0);
+        moves[msg.sender].notRevealed = false; 
     }
 
     /// Check the result of the game
@@ -59,26 +119,49 @@ contract Game {
         address _playerA = msg.sender;
         address _playerB = moves[_playerA].counterPlayer;
         
-        require(!moves[_playerA].notRevealed, "The choice of player A is not revealed");
-        require(!moves[_playerB].notRevealed, "The choice of player B is not revealed");
+        if (moves[_playerB].counterPlayer != _playerA) revert ChallengeNotTaken();
+        if (moves[_playerA].notRevealed) revert RevealMoveFirst(_playerA);
+        if (moves[_playerB].notRevealed) revert RevealMoveFirst(_playerB);
+
+        /// Set the wager of this game     
+        uint256 amount = 0;
+        if(moves[_playerA].wager > moves[_playerB].wager) {
+            amount = moves[_playerB].wager;
+        } else {
+            amount = moves[_playerA].wager;
+        }
+
+        /// Reset wagers of players
+        moves[_playerA].wager = 0;
+        moves[_playerB].wager = 0;
     
         if (moves[_playerA].choice == moves[_playerB].choice) {
-            payable(_playerA).transfer(moves[_playerA].deposit);
-            payable(_playerB).transfer(moves[_playerB].deposit);
-            emit GameEnded(0x0000000000000000000000000000000000000000);
-            return 0x0000000000000000000000000000000000000000;
+            emit GameEnded(address(0));
+            /// Reset counter players to enable these players play together again and withdraw
+            moves[_playerA].counterPlayer = address(0);
+            moves[_playerB].counterPlayer = address(0);
+            return address(0);
         } else if (
             (moves[_playerA].choice == Choice.Rock      && moves[_playerB].choice == Choice.Scissors) || 
             (moves[_playerA].choice == Choice.Paper     && moves[_playerB].choice == Choice.Rock) || 
             (moves[_playerA].choice == Choice.Scissors  && moves[_playerB].choice == Choice.Paper) ||
             (moves[_playerA].choice != Choice.None      && moves[_playerB].choice == Choice.None)
         ) {
-            payable(_playerA).transfer((moves[_playerA].deposit + moves[_playerB].deposit));
+            
+            balance[_playerB] -= amount;
+            balance[_playerA] += amount;
             emit GameEnded(_playerA);
+            /// Reset counter players to enable these players play together again and withdraw
+            moves[_playerA].counterPlayer = address(0);
+            moves[_playerB].counterPlayer = address(0);
             return _playerA;
         } else {
-            payable(_playerB).transfer((moves[_playerA].deposit + moves[_playerB].deposit));
+            balance[_playerA] -= amount;
+            balance[_playerB] += amount;
             emit GameEnded(_playerB);
+            /// Reset counter players to enable these players play together again and withdraw
+            moves[_playerA].counterPlayer = address(0);
+            moves[_playerB].counterPlayer = address(0);
             return _playerB;
         }
     }
