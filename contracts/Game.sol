@@ -49,11 +49,7 @@ contract Game {
         uint256 amount = balance[msg.sender];
         if (amount > 0) {
             balance[msg.sender] = 0;
-            if (!payable(msg.sender).send(amount)) {
-                // No need to call throw here, just reset the amount owing
-                balance[msg.sender] = amount;
-                return false;
-            }
+            payable(msg.sender).transfer(amount);
         }
         return true;
     }
@@ -119,7 +115,6 @@ contract Game {
         address _playerA = msg.sender;
         address _playerB = moves[_playerA].counterPlayer;
         
-        if (moves[_playerB].counterPlayer != _playerA) revert ChallengeNotTaken();
         if (moves[_playerA].notRevealed) revert RevealMoveFirst(_playerA);
         if (moves[_playerB].notRevealed) revert RevealMoveFirst(_playerB);
 
