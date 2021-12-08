@@ -1,7 +1,8 @@
-require("dotenv").config();
-require("@nomiclabs/hardhat-ethers");
-require("@nomiclabs/hardhat-waffle");
-require("solidity-coverage");
+require("dotenv").config()
+require("@nomiclabs/hardhat-ethers")
+require("@nomiclabs/hardhat-waffle")
+require("solidity-coverage")
+require("./tasks/update_frontend")
 
 const MUMBAI_RPC_URL = process.env.MUMBAI_RPC_URL || "https://polygon-mumbai.alchemyapi.io/v2/your-api-key"
 const PRIVATE_KEY = process.env.PRIVATE_KEY || "your private key"
