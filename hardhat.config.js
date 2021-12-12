@@ -14,7 +14,10 @@ module.exports = {
     },
     mumbai: {
       url: MUMBAI_RPC_URL,
-      accounts: [PRIVATE_KEY]
+      accounts: [PRIVATE_KEY],
+      live: true,
+      saveDeployments: true,
+      chainId: 80001,
     }
   },
   solidity: {
