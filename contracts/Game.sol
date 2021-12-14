@@ -28,6 +28,7 @@ contract Game {
     /// Errors
     error TooEarly(uint256 time);
     error CannotWithdrawDuringGame();
+    error TwoPlayersAreNeeded();
     error RevealMoveFirst(address player);
     error InsufficientDeposit(uint256 deposit, uint256 minDeposit);
     error ChallengeNotTaken();
@@ -58,6 +59,8 @@ contract Game {
     /// revealed in the revealing phase.
     /// @param _blindedMove == keccak256(abi.encodePacked(move, salt))
     function move(bytes32 _blindedMove, uint256 _wager , address _counterPlayer) external { 
+        /// Prevent user to play with self
+        if (_counterPlayer == msg.sender) revert TwoPlayersAreNeeded();
         /// Prevent user to move several times, without revealing.
         if (moves[msg.sender].notRevealed) revert RevealMoveFirst(msg.sender);      
         if (balance[msg.sender] < (2 *_wager)) revert InsufficientDeposit(balance[msg.sender], (2 * _wager));

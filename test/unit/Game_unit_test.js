@@ -76,6 +76,10 @@ describe("Rock Paper Scissors Multiplayer Game Unit Test for two players",functi
         await expect(utils.move(accounts[1], 'Paper', 0, accounts[2])).to.be.revertedWith("RevealMoveFirst")
     })
 
+    it("Reverts when player tries to play with self", async function() {
+        await expect(utils.move(accounts[1], 'Paper', 0, accounts[1])).to.be.revertedWith("TwoPlayersAreNeeded")
+    })
+
     it("Aborts the move if the other player does not play at all in 5 minutes", async function() {
        /// Increase the timestamp of next block
        await utils.increaseTimestamp()
