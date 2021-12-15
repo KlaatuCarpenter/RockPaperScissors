@@ -53,7 +53,7 @@ async function result(account) {
     const result = await gameContract.connect(account).result()
     const txReceipt = await result.wait()
     const event = txReceipt.events.find(event => event.event === "GameEnded")
-    const [winner] = event.args
+    const winner = event.args[0]
     return winner
 }
 

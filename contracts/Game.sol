@@ -23,7 +23,7 @@ contract Game {
     mapping(address => uint256) public balance;
 
     /// Events
-    event GameEnded(address winner);
+    event GameEnded(address winner, address playerOne, address playerTwo);
 
     /// Errors
     error TooEarly(uint256 time);
@@ -134,7 +134,7 @@ contract Game {
         moves[_playerB].wager = 0;
     
         if (moves[_playerA].choice == moves[_playerB].choice) {
-            emit GameEnded(address(0));
+            emit GameEnded(address(0), _playerA, _playerB);
             /// Reset counter players to enable these players play together again and withdraw
             moves[_playerA].counterPlayer = address(0);
             moves[_playerB].counterPlayer = address(0);
@@ -148,7 +148,7 @@ contract Game {
             
             balance[_playerB] -= amount;
             balance[_playerA] += amount;
-            emit GameEnded(_playerA);
+            emit GameEnded(_playerA, _playerA, _playerB);
             /// Reset counter players to enable these players play together again and withdraw
             moves[_playerA].counterPlayer = address(0);
             moves[_playerB].counterPlayer = address(0);
@@ -156,7 +156,7 @@ contract Game {
         } else {
             balance[_playerA] -= amount;
             balance[_playerB] += amount;
-            emit GameEnded(_playerB);
+            emit GameEnded(_playerB, _playerA, _playerB);
             /// Reset counter players to enable these players play together again and withdraw
             moves[_playerA].counterPlayer = address(0);
             moves[_playerB].counterPlayer = address(0);
