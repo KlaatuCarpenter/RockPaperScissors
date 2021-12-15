@@ -27,7 +27,7 @@ contract Game {
 
     /// Errors
     error TooEarly(uint256 time);
-    error CannotWithdrawDuringGame();
+    error NotPossibleDuringGame();
     error TwoPlayersAreNeeded();
     error RevealMoveFirst(address player);
     error InsufficientDeposit(uint256 deposit, uint256 minDeposit);
@@ -46,7 +46,7 @@ contract Game {
 
     /// Withdraw funds
     function withdraw() external returns (bool) {
-        if (moves[msg.sender].counterPlayer != address(0)) revert CannotWithdrawDuringGame();
+        if (moves[msg.sender].counterPlayer != address(0)) revert NotPossibleDuringGame();
         uint256 amount = balance[msg.sender];
         if (amount > 0) {
             balance[msg.sender] = 0;
@@ -62,7 +62,7 @@ contract Game {
         /// Prevent user to play with self
         if (_counterPlayer == msg.sender) revert TwoPlayersAreNeeded();
         /// Prevent user to move several times, without revealing.
-        if (moves[msg.sender].notRevealed) revert RevealMoveFirst(msg.sender);      
+        if (moves[msg.sender].counterPlayer != address(0)) revert NotPossibleDuringGame();
         if (balance[msg.sender] < (2 *_wager)) revert InsufficientDeposit(balance[msg.sender], (2 * _wager));
         Move storage m = moves[msg.sender];       
         m.blindedMove = _blindedMove;

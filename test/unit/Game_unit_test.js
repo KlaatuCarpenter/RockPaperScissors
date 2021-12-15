@@ -61,7 +61,7 @@ describe("Rock Paper Scissors Multiplayer Game Unit Test for two players",functi
     })
 
     it("Reverts when trying to wihdrawal during the game", async function() {
-        await expect(gameContract.connect(accounts[1]).withdraw()).to.be.revertedWith("CannotWithdrawDuringGame")
+        await expect(gameContract.connect(accounts[1]).withdraw()).to.be.revertedWith("NotPossibleDuringGame")
     })
 
     it("Should fail to abort the move before 5 minutes period", async function() {
@@ -72,12 +72,12 @@ describe("Rock Paper Scissors Multiplayer Game Unit Test for two players",functi
         await expect(utils.reveal(accounts[1], 'Rock')).to.be.revertedWith("ChallengeNotTaken")
     })
 
-    it("Reverts trying to play more than one game at the time", async function() {
-        await expect(utils.move(accounts[1], 'Paper', 0, accounts[2])).to.be.revertedWith("RevealMoveFirst")
-    })
-
     it("Reverts when player tries to play with self", async function() {
         await expect(utils.move(accounts[1], 'Paper', 0, accounts[1])).to.be.revertedWith("TwoPlayersAreNeeded")
+    })
+
+    it("Reverts when player tries to change the move before result", async function() {
+        await expect(utils.move(accounts[1], 'Paper', 0, accounts[2])).to.be.revertedWith("NotPossibleDuringGame")
     })
 
     it("Aborts the move if the other player does not play at all in 5 minutes", async function() {
