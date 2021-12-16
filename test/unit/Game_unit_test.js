@@ -76,6 +76,12 @@ describe("Rock Paper Scissors Multiplayer Game Unit Test for two players",functi
         await expect(utils.move(accounts[1], 'Paper', 0, accounts[1])).to.be.revertedWith("TwoPlayersAreNeeded")
     })
 
+    it("Reverts when player tries to play with address zero", async function() {
+        const choiceNo = 1
+        const blindedMove = ethers.utils.solidityKeccak256(["uint8", "bytes32"], [choiceNo, secretSalt])
+        await expect(gameContract.connect(accounts[1]).move(blindedMove, 0, ethers.constants.AddressZero)).to.be.revertedWith("TwoPlayersAreNeeded")
+    })
+
     it("Reverts when player tries to change the move before result", async function() {
         await expect(utils.move(accounts[1], 'Paper', 0, accounts[2])).to.be.revertedWith("NotPossibleDuringGame")
     })

@@ -60,7 +60,7 @@ contract Game {
     /// @param _blindedMove == keccak256(abi.encodePacked(move, salt))
     function move(bytes32 _blindedMove, uint256 _wager , address _counterPlayer) external { 
         /// Prevent user to play with self
-        if (_counterPlayer == msg.sender) revert TwoPlayersAreNeeded();
+        if (_counterPlayer == msg.sender || _counterPlayer == address(0)) revert TwoPlayersAreNeeded();
         /// Prevent user to move several times, without revealing.
         if (moves[msg.sender].counterPlayer != address(0)) revert NotPossibleDuringGame();
         if (balance[msg.sender] < (2 *_wager)) revert InsufficientDeposit(balance[msg.sender], (2 * _wager));
