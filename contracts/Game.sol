@@ -23,7 +23,7 @@ contract Game {
     mapping(address => uint256) public balance;
 
     /// Events
-    event GameEnded(address winner, address playerOne, address playerTwo);
+    event GameEnded(address indexed winner, address indexed playerOne, address indexed playerTwo);
 
     /// Errors
     error TooEarly(uint256 time);
@@ -58,6 +58,8 @@ contract Game {
     /// The game can only be won, when the move is correctly
     /// revealed in the revealing phase.
     /// @param _blindedMove == keccak256(abi.encodePacked(move, salt))
+    /// @param _wager - is bet. Players can play vary wagers. In the result smaller is taken.
+    /// @param _counterPlayer - cannot be address zero and msg.sender
     function move(bytes32 _blindedMove, uint256 _wager , address _counterPlayer) external { 
         /// Prevent user to play with self
         if (_counterPlayer == msg.sender || _counterPlayer == address(0)) revert TwoPlayersAreNeeded();
@@ -118,10 +120,11 @@ contract Game {
         address _playerA = msg.sender;
         address _playerB = moves[_playerA].counterPlayer;
         
+        if (_playerB == address(0)) revert TwoPlayersAreNeeded();
         if (moves[_playerA].notRevealed) revert RevealMoveFirst(_playerA);
         if (moves[_playerB].notRevealed) revert RevealMoveFirst(_playerB);
 
-        /// Set the wager of this game     
+        /// Set the wager of the game     
         uint256 amount = 0;
         if(moves[_playerA].wager > moves[_playerB].wager) {
             amount = moves[_playerB].wager;

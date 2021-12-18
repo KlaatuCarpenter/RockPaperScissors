@@ -60,6 +60,7 @@ describe("Rock Paper Scissors Multiplayer Game Unit Test for two players",functi
         expect(moveP1.choice).to.equal(0)
     })
 
+
     it("Reverts when trying to wihdrawal during the game", async function() {
         await expect(gameContract.connect(accounts[1]).withdraw()).to.be.revertedWith("NotPossibleDuringGame")
     })
@@ -161,6 +162,10 @@ describe("Rock Paper Scissors Multiplayer Game Unit Test for two players",functi
         expect(moveP2.counterPlayer).to.equal(ethers.constants.AddressZero)
         expect(balanceP1).to.equal(expectedBalanceP1)
         expect(balanceP2).to.equal(expectedBalanceP2)
+    })
+
+    it("Reverts when player tries to play same move two times", async function() {
+        await expect(utils.result(accounts[1])).to.be.revertedWith("TwoPlayersAreNeeded")
     })
 
     it("Rock wins with scissors", async function() {
