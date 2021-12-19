@@ -26,5 +26,5 @@ It is possible to verify contract code on Polygonscan: https://mumbai.polygonsca
 
 ## Task update_frontend
 To make work on frontend a little bit easier I created a task `update_frontend`.  
-It copies contract abi and mapping of addresses of the contract to chain ids deployed with hardhat to relative path  
+It copies contract abi and mapping of contract's addresses to chain ids, deployed with hardhat, to relative path:  
 `"../frontend/src/build/"`
