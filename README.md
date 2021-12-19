@@ -1,6 +1,6 @@
 # RockPaperScissors test project
 
-I this smart contract two players can play the classic game of rock, paper scissors using MATIC in Mumbai testnet.  
+In this smart contract two players can play the classic game of rock, paper scissors using MATIC token in Mumbai testnet.  
 - To enroll, each player needs to deposit the right token amount, possibly zero and choose the address of an opponent.
 - To play, each player need to submit an unique move.
 - The contract decides and rewards the winner with token wagered.  
@@ -27,4 +27,4 @@ It is possible to verify contract code on Polygonscan: https://mumbai.polygonsca
 ## Task update_frontend
 To make work on frontend a little bit easier I created a task `update_frontend`.  
 It copies contract abi and mapping of contract's addresses to chain ids, deployed with hardhat, to relative path:  
-`"../frontend/src/build/"`
+`../frontend/src/build/`
