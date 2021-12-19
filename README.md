@@ -9,7 +9,6 @@ I this smart contract two players can play the classic game of rock, paper sciss
 - To place a wager a player should have two times more tokens deposited in smart contract.
 
 Smart contract is tested using hardhat. Coverage 100%.  
-------------|----------|----------|----------|----------|----------------|
 File        |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
 ------------|----------|----------|----------|----------|----------------|
  contracts\ |      100 |      100 |      100 |      100 |                |
