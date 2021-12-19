@@ -116,7 +116,7 @@ contract Game {
     }
 
     /// Check the result of the game
-    function result() external returns(address) {
+    function result() external {
         address _playerA = msg.sender;
         address _playerB = moves[_playerA].counterPlayer;
         
@@ -137,33 +137,29 @@ contract Game {
         moves[_playerB].wager = 0;
     
         if (moves[_playerA].choice == moves[_playerB].choice) {
-            emit GameEnded(address(0), _playerA, _playerB);
             /// Reset counter players to enable these players play together again and withdraw
             moves[_playerA].counterPlayer = address(0);
             moves[_playerB].counterPlayer = address(0);
-            return address(0);
+            emit GameEnded(address(0), _playerA, _playerB);
         } else if (
             (moves[_playerA].choice == Choice.Rock      && moves[_playerB].choice == Choice.Scissors) || 
             (moves[_playerA].choice == Choice.Paper     && moves[_playerB].choice == Choice.Rock) || 
             (moves[_playerA].choice == Choice.Scissors  && moves[_playerB].choice == Choice.Paper) ||
             (moves[_playerA].choice != Choice.None      && moves[_playerB].choice == Choice.None)
-        ) {
-            
+        ) {  
+            /// Reset counter players to enable these players play together again and withdraw
+            moves[_playerA].counterPlayer = address(0);
+            moves[_playerB].counterPlayer = address(0);
+            emit GameEnded(_playerA, _playerA, _playerB);
             balance[_playerB] -= amount;
             balance[_playerA] += amount;
-            emit GameEnded(_playerA, _playerA, _playerB);
+        } else {
             /// Reset counter players to enable these players play together again and withdraw
             moves[_playerA].counterPlayer = address(0);
             moves[_playerB].counterPlayer = address(0);
-            return _playerA;
-        } else {
+            emit GameEnded(_playerB, _playerA, _playerB);
             balance[_playerA] -= amount;
             balance[_playerB] += amount;
-            emit GameEnded(_playerB, _playerA, _playerB);
-            /// Reset counter players to enable these players play together again and withdraw
-            moves[_playerA].counterPlayer = address(0);
-            moves[_playerB].counterPlayer = address(0);
-            return _playerB;
         }
     }
 }
