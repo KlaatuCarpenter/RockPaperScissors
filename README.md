@@ -6,7 +6,8 @@ In this smart contract two players can play the classic game of rock, paper scis
 - The contract decides and rewards the winner with token wagered.  
 - Players can bet their previous winnings. Tokens are deposited in smart contract. Withdrawal are possible anytime except during the game.
 - To entice players to play, knowing that they may have their funds stuck in the contract if they face an uncooperative player, the institution of `terminateGame` was used. After 5 minutes without other player responding the player can terminate the game and win double wager.
-- To place a wager a player should have two times more tokens deposited in smart contract to prevent uncooperativness as above.  
+- To place a wager a player should have two times more tokens deposited in smart contract to prevent uncooperativness as above.
+- Each player can place in wager an amount of his own. During the game wagers of two players are compared and the smaller amount is taken into consideration.
 
 To optimize gas:
 - Custom errors are defined.
