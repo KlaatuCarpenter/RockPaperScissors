@@ -8,7 +8,7 @@ I this smart contract two players can play the classic game of rock, paper sciss
 - To entice players to play, knowing that they may have their funds stuck in the contract if they face an uncooperative player, the institution of `terminateGame` was used. After 5 minutes without other player responding the player can terminate the game and win double wager.
 - To place a wager a player should have two times more tokens deposited in smart contract.
 
-Smart contract is tested using hardhat. Coverage 100%.
+Smart contract is tested using hardhat. Coverage 100%.  
 ------------|----------|----------|----------|----------|----------------|
 File        |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
 ------------|----------|----------|----------|----------|----------------|
